@@ -4541,3 +4541,63 @@ a {
 }
 /* End homepage hero logo frame */
 
+/* Supplier admin invoice preview popout */
+.supplier-admin-invoice-popout-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 30px;
+  background: rgba(0, 0, 0, 0.42);
+}
+
+.supplier-admin-invoice-popout {
+  position: relative;
+  width: min(100%, 980px);
+  max-height: calc(100vh - 60px);
+  overflow: auto;
+  padding: 54px 24px 24px;
+  background: #ffffff;
+  border: 2px solid #1b5e20;
+  border-radius: 12px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+}
+
+.supplier-admin-invoice-popout-close {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  color: #1f1f1f;
+  background: #eef7f0;
+  border: 1.5px solid #1b5e20;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 30px;
+  line-height: 1;
+}
+
+.supplier-admin-invoice-popout img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: calc(100vh - 150px);
+  object-fit: contain;
+}
+
+@media (max-width: 760px) {
+  .supplier-admin-invoice-popout-backdrop {
+    padding: 14px;
+  }
+
+  .supplier-admin-invoice-popout {
+    max-height: calc(100vh - 28px);
+    padding: 52px 12px 12px;
+  }
+}
+/* End supplier admin invoice preview popout */
+

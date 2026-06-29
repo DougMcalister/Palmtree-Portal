@@ -10,7 +10,7 @@ function SettingsIcon() {
 export function SupplierHeader() {
   return (
     <header className="supplier-dashboard-header">
-      <a className="brand" href="/supplier" aria-label="Supplier Home">
+      <a className="brand" href="/" aria-label="Supplier Home">
         <img className="app-brand-logo" 
             src="/Supplier_logo.png" 
             alt="MALLEE Civic Support Logo" 

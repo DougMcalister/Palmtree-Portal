@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
 import { workOrdersDatabase } from '../local-database.ts'
 
@@ -49,9 +48,9 @@ function ProfileIcon() {
 }
 
 function SupplierAdminPage() {
-  const navigate = useNavigate()
   const visibleOrders = workOrdersDatabase.slice(0, 11)
   const [selectedOrder, setSelectedOrder] = useState('')
+  const [isInvoicePreviewOpen, setIsInvoicePreviewOpen] = useState(false)
 
   return (
     <main className="homepage supplier-admin-page" aria-label="Supplier admin">
@@ -73,7 +72,7 @@ function SupplierAdminPage() {
         </select>
 
         <div className="supplier-admin-top-actions">
-          <button type="button" onClick={() => navigate('/invoicing')}>
+          <button type="button" onClick={() => setIsInvoicePreviewOpen(true)}>
             Invoice
           </button>
           <button type="button">
@@ -103,7 +102,7 @@ function SupplierAdminPage() {
                   <td>{order.description}</td>
                   <td>{order.due}</td>
                   <td>
-                    <button type="button" onClick={() => navigate('/invoicing')}>
+                    <button type="button" onClick={() => setIsInvoicePreviewOpen(true)}>
                       <span>Invoice</span>
                       <ArrowRightIcon />
                     </button>
@@ -135,6 +134,23 @@ function SupplierAdminPage() {
           </div>
         </aside>
       </section>
+
+      {isInvoicePreviewOpen ? (
+        <div className="supplier-admin-invoice-popout-backdrop" role="presentation">
+          <section className="supplier-admin-invoice-popout" role="dialog" aria-modal="true" aria-label="Invoice sample preview">
+            <button
+              className="supplier-admin-invoice-popout-close"
+              type="button"
+              aria-label="Close invoice preview"
+              onClick={() => setIsInvoicePreviewOpen(false)}
+            >
+              ×
+            </button>
+
+            <img src="/invoice-sample.svg" alt="Invoice sample" />
+          </section>
+        </div>
+      ) : null}
 
       <AppFooter />
     </main>
