@@ -116,7 +116,7 @@ function SupplierAdminPage() {
 
         <aside className="supplier-admin-guide-profile" aria-label="Supplier profile controls">
           <div className="supplier-admin-avatar">
-            <img src="/public/Supplier_logo.png" alt="Logo :(" />
+            <ProfileIcon />
           </div>
 
           <div className="supplier-admin-profile-actions">
