@@ -41,7 +41,9 @@ function PublicHomepage() {
           </div>
         </div>
 
-        <div className="hero-image-frame" aria-label="Image frame reserved for a future homepage image" />
+        <div className="hero-image-frame" aria-label="Image frame reserved for a future homepage image">
+          <img src="/public/Logo.png" alt="Site Logo" />
+        </div>
       </section>
 
       <section className="homepage-info-cards" aria-label="Homepage information">
