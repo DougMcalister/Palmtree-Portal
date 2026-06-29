@@ -1,6 +1,6 @@
 import { type FormEvent, useState } from 'react'
 import { authenticateUser, type LoginRole } from './auth.ts'
-import { PublicHeader } from './homepage.tsx'
+import { HomepageHeader } from './homepage.tsx'
 
 const roleLabels: Record<LoginRole, string> = {
   client: 'Client',
@@ -32,7 +32,7 @@ function LoginPage() {
 
   return (
     <main className="public-shell login-page">
-      <PublicHeader />
+      <HomepageHeader />
       <a className="login-close" href="/" aria-label="Close login">×</a>
 
       <section className="login-card" aria-labelledby="login-title">
