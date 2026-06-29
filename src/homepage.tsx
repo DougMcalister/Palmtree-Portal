@@ -1,34 +1,26 @@
-import { type MouseEvent } from 'react'
-
 type InfoCard = {
   title: string
-  href: string
+  text: string
+  label: string
 }
 
 const infoCards: InfoCard[] = [
-  { title: 'About', href: '/about-us' },
-  { title: 'Why Choose Us', href: '/why-choose-us' },
-  { title: 'Key Features', href: '/key-features' },
+  {
+    title: 'About',
+    label: 'Platform',
+    text: 'Palmtree Project helps local councils collect consistent Scope 3 emissions data from suppliers without turning reporting into another heavy administrative task.',
+  },
+  {
+    title: 'Why Choose Us',
+    label: 'Approach',
+    text: 'Built for civic procurement, supplier privacy, and practical reporting, the platform keeps data capture focused on what councils and suppliers actually need.',
+  },
+  {
+    title: 'Key Features',
+    label: 'Tools',
+    text: 'Track supplier activity, connect invoices to inventory records, review emissions analytics, and support small businesses with simpler reporting workflows.',
+  },
 ]
-
-function handleTransitionLink(event: MouseEvent<HTMLAnchorElement>, href: string) {
-  if (
-    event.defaultPrevented ||
-    event.metaKey ||
-    event.ctrlKey ||
-    event.shiftKey ||
-    event.altKey ||
-    event.button !== 0
-  ) {
-    return
-  }
-
-  event.preventDefault()
-  document.documentElement.classList.add('page-transition-out')
-  window.setTimeout(() => {
-    window.location.assign(href)
-  }, 220)
-}
 
 function PublicHomepage() {
   return (
@@ -56,12 +48,11 @@ function PublicHomepage() {
         {infoCards.map((card) => (
           <a
             className="homepage-info-card"
-            href={card.href}
             key={card.title}
-            onClick={(event) => handleTransitionLink(event, card.href)}
           >
-            <span className="homepage-info-image" aria-label={`Image placeholder for ${card.title}`} />
-            <span className="homepage-info-title">{card.title}</span>
+            <span className="homepage-info-label">{card.label}</span>
+            <h2 className="homepage-info-title">{card.title}</h2>
+            <p>{card.text}</p>
           </a>
         ))}
       </section>
@@ -76,12 +67,6 @@ export function HomepageHeader() {
         <img className="homepage-control-brand-mark" src="/Logo.png" alt="" aria-hidden="true" />
         <span>Palmtree Project</span>
       </a>
-
-      <nav className="homepage-control-nav" aria-label="Homepage navigation links">
-        <a className="homepage-header-button" href="/about-us">About Us</a>
-        <a className="homepage-header-button" href="/why-choose-us">Why Choose Us</a>
-        <a className="homepage-header-button" href="/key-features">Key Features</a>
-      </nav>
 
       <div className="homepage-auth-actions" aria-label="Account actions">
         <a className="homepage-header-button homepage-auth-button" href="/login">Login</a>
@@ -98,12 +83,6 @@ export function PublicHeader() {
         <span className="public-brand-mark" aria-hidden="true">P</span>
         <span>Palmtree</span>
       </a>
-
-      <nav className="public-nav" aria-label="Public navigation">
-        <a href="/about-us">About Us</a>
-        <a href="/why-choose-us">Why Choose Us</a>
-        <a href="/key-features">Key Features</a>
-      </nav>
 
       <div className="public-account-links">
         <a href="/login">Login</a>
