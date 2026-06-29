@@ -4512,3 +4512,32 @@ a {
 }
 /* End homepage information cards */
 
+/* Homepage hero logo frame */
+.hero-image-frame {
+  display: grid;
+  place-items: center;
+  padding: clamp(28px, 5vw, 64px);
+}
+
+.hero-image-frame img {
+  display: block;
+  width: min(100%, 420px);
+  max-height: clamp(240px, 34vw, 440px);
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 18px 28px rgba(21, 93, 33, 0.16));
+}
+
+.public-homepage .hero-image-frame {
+  background: rgba(255, 255, 255, 0.58);
+  border-color: rgba(21, 93, 33, 0.32);
+  box-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .hero-image-frame img {
+    width: min(82vw, 360px);
+  }
+}
+/* End homepage hero logo frame */
+

@@ -42,7 +42,7 @@ function PublicHomepage() {
         </div>
 
         <div className="hero-image-frame" aria-label="Image frame reserved for a future homepage image">
-          <img src="/public/Logo.png" alt="Site Logo" />
+          <img src="/Logo.png" alt="The Palmtree Project logo" />
         </div>
       </section>
 
