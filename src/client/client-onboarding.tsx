@@ -1,4 +1,4 @@
-import { useActionData } from "react-router";
+//import { useActionData } from "react-router";
 import { HomepageHeader } from "../homepage";
 import { useState } from "react";
 
@@ -79,10 +79,12 @@ function ClienOnboarding() {
                         />
                     </label>
                 </form>
-                <button className="" type="submit" disabled={}>
+                <button className="" type="submit" disabled={true}>
 
                 </button>
             </div>
         </main>
     )
 }
+
+export default ClienOnboarding
