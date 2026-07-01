@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { Link } from 'react-router'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
 import {
   purchaseOrderDatabase,
@@ -199,6 +200,47 @@ function SupplierAnalyticsPage() {
         </dl>
       </section>
 
+      <section className="supplier-orders-panel" aria-labelledby="supplier-orders-title">
+        <div className="supplier-analytics-card-header">
+          <h2 id="supplier-orders-title">Current Work / Purchase Orders</h2>
+          <span>Matched by supplier ID</span>
+        </div>
+
+        <div className="supplier-orders-table-wrap">
+          <table className="supplier-analytics-table supplier-orders-table">
+            <caption>Supplier current work and purchase orders</caption>
+            <thead>
+              <tr>
+                <th scope="col">Order</th>
+                <th scope="col">Type</th>
+                <th scope="col">Category</th>
+                <th scope="col">Description</th>
+                <th scope="col">Due</th>
+                <th scope="col">Emissions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {currentOrderRows.map((order) => (
+                <tr key={order.id}>
+                  <td>{order.id}</td>
+                  <td>{order.type}</td>
+                  <td>{order.category}</td>
+                  <td>{order.description}</td>
+                  <td>{order.due}</td>
+                  <td>{formatEmissions(order.emissions)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <div className="supplier-invoicing-cta" aria-label="Invoice actions">
+        <Link className="supplier-invoicing-button" to="/invoicing">
+          Invoicing
+        </Link>
+      </div>
+
       <section className="supplier-analytics-layout" aria-label="Supplier emissions analytics">
         <div className="supplier-analytics-main-column">
           <EmissionsBarChart categoryTotals={categoryTotals} />
@@ -259,41 +301,6 @@ function SupplierAnalyticsPage() {
               </tbody>
             </table>
           </article>
-        </div>
-      </section>
-
-      <section className="supplier-orders-panel" aria-labelledby="supplier-orders-title">
-        <div className="supplier-analytics-card-header">
-          <h2 id="supplier-orders-title">Current Work / Purchase Orders</h2>
-          <span>Matched by supplier ID</span>
-        </div>
-
-        <div className="supplier-orders-table-wrap">
-          <table className="supplier-analytics-table supplier-orders-table">
-            <caption>Supplier current work and purchase orders</caption>
-            <thead>
-              <tr>
-                <th scope="col">Order</th>
-                <th scope="col">Type</th>
-                <th scope="col">Category</th>
-                <th scope="col">Description</th>
-                <th scope="col">Due</th>
-                <th scope="col">Emissions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {currentOrderRows.map((order) => (
-                <tr key={order.id}>
-                  <td>{order.id}</td>
-                  <td>{order.type}</td>
-                  <td>{order.category}</td>
-                  <td>{order.description}</td>
-                  <td>{order.due}</td>
-                  <td>{formatEmissions(order.emissions)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
         </div>
       </section>
 

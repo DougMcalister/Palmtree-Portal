@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
+import supplierLogo from '../assets/Supplier_logo.png'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
-import { workOrderDatabase } from '../local-database.ts'
+import { workOrderDatabase, type WorkOrder } from '../local-database.ts'
 import { plumbingInventoryDatabase } from './plumbing-inventory-database.ts'
 
 type InvoiceCategory = 'Transport' | 'Equipment' | 'Waste' | 'Utilities'
@@ -26,6 +27,7 @@ type LineFormState = {
 }
 
 const invoiceCategories: InvoiceCategory[] = ['Transport', 'Equipment', 'Waste', 'Utilities']
+const supplierName = "Tim's Trees"
 
 const invoiceInventoryMap: Record<InvoiceCategory, InventoryKind[]> = {
   Transport: ['vehicles'],
@@ -64,9 +66,13 @@ const emptyLineForm: LineFormState = {
   notes: '',
 }
 
-function OrdersDropdown() {
-  const [selectedOrder, setSelectedOrder] = useState('')
-
+function OrdersDropdown({
+  selectedOrder,
+  onChange,
+}: {
+  selectedOrder: string
+  onChange: (orderNumber: string) => void
+}) {
   const firstFifteenOrders = workOrderDatabase.slice(0, 15)
 
   return (
@@ -76,7 +82,7 @@ function OrdersDropdown() {
       <select
         id="order-select"
         value={selectedOrder}
-        onChange={(event) => setSelectedOrder(event.target.value)}
+        onChange={(event) => onChange(event.target.value)}
       >
         <option value="">Choose an Order</option>
 
@@ -111,6 +117,20 @@ function formatInventoryLabel(item: InventoryItem, kind: InventoryKind) {
 
 function formatFactor(item: InventoryItem) {
   return item.emissionsFactor.value.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' ' + item.emissionsFactor.unit
+}
+
+function formatEmissions(value: number) {
+  return value.toLocaleString(undefined, { maximumFractionDigits: 2 }) + ' kg CO2e'
+}
+
+function formatInvoiceDate(value: Date | string) {
+  const date = typeof value === 'string' ? new Date(value + 'T00:00:00') : value
+
+  return new Intl.DateTimeFormat('en-AU', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(date)
 }
 
 function parseAmount(value: string) {
@@ -272,10 +292,144 @@ function InvoiceLineModal({
   )
 }
 
+function GeneratedInvoicePreview({
+  selectedOrder,
+  selectedWorkOrder,
+  lineItems,
+  onClose,
+}: {
+  selectedOrder: string
+  selectedWorkOrder?: WorkOrder
+  lineItems: InvoiceLineItem[]
+  onClose: () => void
+}) {
+  const invoiceDate = new Date()
+  const invoiceNumber = 'INV-' + (selectedOrder || 'DRAFT') + '-' + invoiceDate.getFullYear()
+  const categoryTotals = invoiceCategories.map((category) => ({
+    category,
+    total: lineItems
+      .filter((item) => item.category === category)
+      .reduce((sum, item) => sum + item.emissionsKgCo2e, 0),
+  }))
+  const totalEmissions = categoryTotals.reduce((sum, item) => sum + item.total, 0)
+
+  return (
+    <div className="generated-invoice-backdrop" role="presentation">
+      <section className="generated-invoice-dialog" role="dialog" aria-modal="true" aria-labelledby="generated-invoice-title">
+        <button className="generated-invoice-close" type="button" aria-label="Close generated invoice" onClick={onClose}>
+          ×
+        </button>
+
+        <article className="generated-invoice-sheet">
+          <header className="generated-invoice-header">
+            <div className="generated-invoice-brand">
+              <img src={supplierLogo} alt="" />
+              <div>
+                <p>Supplier invoice</p>
+                <h1 id="generated-invoice-title">{supplierName}</h1>
+              </div>
+            </div>
+
+            <dl className="generated-invoice-meta">
+              <div>
+                <dt>Invoice No.</dt>
+                <dd>{invoiceNumber}</dd>
+              </div>
+              <div>
+                <dt>Date</dt>
+                <dd>{formatInvoiceDate(invoiceDate)}</dd>
+              </div>
+              <div>
+                <dt>Work Order</dt>
+                <dd>{selectedOrder || 'Not selected'}</dd>
+              </div>
+            </dl>
+          </header>
+
+          <section className="generated-invoice-party-grid" aria-label="Invoice parties">
+            <div>
+              <span>Issued by</span>
+              <strong>{supplierName}</strong>
+              <p>Supplier emissions and service reporting</p>
+            </div>
+            <div>
+              <span>Issued to</span>
+              <strong>City of Melville</strong>
+              <p>{selectedWorkOrder?.client ?? 'Operations Department'}</p>
+            </div>
+          </section>
+
+          <section className="generated-invoice-order-summary" aria-label="Selected work order summary">
+            <div>
+              <span>Category</span>
+              <strong>{selectedWorkOrder?.category ?? 'Pending selection'}</strong>
+            </div>
+            <div>
+              <span>Description</span>
+              <strong>{selectedWorkOrder?.description ?? 'No work order selected'}</strong>
+            </div>
+            <div>
+              <span>Due date</span>
+              <strong>{selectedWorkOrder ? formatInvoiceDate(selectedWorkOrder.due) : 'Not selected'}</strong>
+            </div>
+          </section>
+
+          <div className="generated-invoice-table-wrap">
+            <table className="generated-invoice-table">
+              <caption>Generated invoice line items</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Category</th>
+                  <th scope="col">Item</th>
+                  <th scope="col">Inventory ID</th>
+                  <th scope="col">Activity</th>
+                  <th scope="col">Notes</th>
+                  <th scope="col">Emissions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lineItems.map((item) => (
+                  <tr key={item.id}>
+                    <td>{item.category}</td>
+                    <td>{item.itemName}</td>
+                    <td>{item.inventoryId}</td>
+                    <td>{item.activity}</td>
+                    <td>{item.notes || '—'}</td>
+                    <td>{formatEmissions(item.emissionsKgCo2e)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <footer className="generated-invoice-footer">
+            <dl className="generated-invoice-subtotals">
+              {categoryTotals.map((item) => (
+                <div key={item.category}>
+                  <dt>{item.category}</dt>
+                  <dd>{formatEmissions(item.total)}</dd>
+                </div>
+              ))}
+            </dl>
+
+            <div className="generated-invoice-total">
+              <span>Total emissions</span>
+              <strong>{formatEmissions(totalEmissions)}</strong>
+            </div>
+          </footer>
+        </article>
+      </section>
+    </div>
+  )
+}
+
 function SupplierInvoicing () {
   const [lineItems, setLineItems] = useState<InvoiceLineItem[]>([])
   const [activeCategory, setActiveCategory] = useState<InvoiceCategory | null>(null)
   const [formState, setFormState] = useState<LineFormState>(emptyLineForm)
+  const [selectedOrder, setSelectedOrder] = useState('')
+  const [isInvoicePreviewOpen, setIsInvoicePreviewOpen] = useState(false)
+  const selectedWorkOrder = workOrderDatabase.find((order) => order.jobNo === selectedOrder)
 
   function openLineModal(category: InvoiceCategory) {
     setActiveCategory(category)
@@ -317,16 +471,32 @@ function SupplierInvoicing () {
     closeLineModal()
   }
 
+  function clearInvoiceDraft() {
+    setLineItems([])
+    setSelectedOrder('')
+    setIsInvoicePreviewOpen(false)
+  }
+
   return (
     <main className="supplier-invoice-page">
       <SupplierHeader />
       <div className='select-and-send'>
         <div className='select-dropdown'>
-          <OrdersDropdown />
+          <OrdersDropdown selectedOrder={selectedOrder} onChange={setSelectedOrder} />
         </div>
         <div className='send-cancel-button'>
-          <a className='send-button' href='' >Send</a>
-          <a className='cancel-button' href=''>Cancel</a>
+          <button
+            className='send-button'
+            type='button'
+            disabled={lineItems.length === 0 || !selectedOrder}
+            title={!selectedOrder ? 'Select a work order number before sending' : undefined}
+            onClick={() => setIsInvoicePreviewOpen(true)}
+          >
+            Send
+          </button>
+          <button className='cancel-button' type='button' onClick={clearInvoiceDraft}>
+            Cancel
+          </button>
         </div>
       </div>
       <div className='invoice-items'>
@@ -364,7 +534,7 @@ function SupplierInvoicing () {
                           <td>{item.inventoryId}</td>
                           <td>{item.activity}</td>
                           <td>{item.notes || '—'}</td>
-                          <td>{item.emissionsKgCo2e.toLocaleString(undefined, { maximumFractionDigits: 2 })} kg CO2e</td>
+                          <td>{formatEmissions(item.emissionsKgCo2e)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -383,6 +553,15 @@ function SupplierInvoicing () {
           onChange={setFormState}
           onClose={closeLineModal}
           onSubmit={addLineItem}
+        />
+      ) : null}
+
+      {isInvoicePreviewOpen ? (
+        <GeneratedInvoicePreview
+          selectedOrder={selectedOrder}
+          selectedWorkOrder={selectedWorkOrder}
+          lineItems={lineItems}
+          onClose={() => setIsInvoicePreviewOpen(false)}
         />
       ) : null}
 
