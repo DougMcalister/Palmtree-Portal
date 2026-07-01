@@ -27,7 +27,7 @@ type LineFormState = {
 }
 
 const invoiceCategories: InvoiceCategory[] = ['Transport', 'Equipment', 'Waste', 'Utilities']
-const supplierName = "Tim's Trees"
+const supplierName = "Mallee Civic Support"
 
 const invoiceInventoryMap: Record<InvoiceCategory, InventoryKind[]> = {
   Transport: ['vehicles'],

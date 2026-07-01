@@ -15,7 +15,8 @@ function ClientDashboardHeader() {
 
       <nav className="client-dashboard-nav" aria-label="Client dashboard navigation">
         {clientNavItems.map((item) => (
-          <NavLink className={({ isActive }) => (isActive ? 'is-active' : undefined)} end={item.to === '/client'} key={item.to} to={item.to}>
+          <NavLink className={({ isActive }) => (isActive ? 'is-active' : undefined)}
+          end={item.to === '/client'} key={item.to} to={item.to}>
             <span>{item.label}</span>
           </NavLink>
         ))}
