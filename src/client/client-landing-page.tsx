@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router'
 import ClientDashboardHeader from './client-dashboard-header'
-import { supplierDatabase } from '../local-database'
+import { supplierDatabase, workOrderDatabase } from '../local-database'
 
 function SearchIcon() {
   return (
@@ -40,15 +40,64 @@ function getRankClass(index: number) {
   return ''
 }
 
+type WorkOrderCategory = (typeof workOrderDatabase)[number]['category']
+type WorkOrderCategoryFilter = 'all' | WorkOrderCategory
+
+const workOrderCategoryOptions = Array.from(
+  new Set(workOrderDatabase.map((order) => order.category)),
+).sort() as WorkOrderCategory[]
+
+const supplierWorkOrderSearchText = new Map(
+  supplierDatabase.map((supplier) => {
+    const associatedWorkOrders = workOrderDatabase.filter((order) => order.supplier_id === supplier.id)
+    const workOrderText = associatedWorkOrders
+      .map((order) => [order.jobNo, order.client, order.category, order.description, order.due].join(' '))
+      .join(' ')
+
+    return [supplier.id, workOrderText.toLowerCase()]
+  }),
+)
+
+const supplierWorkOrderCategories = new Map(
+  supplierDatabase.map((supplier) => [
+    supplier.id,
+    new Set(workOrderDatabase.filter((order) => order.supplier_id === supplier.id).map((order) => order.category)),
+  ]),
+)
+
 function ClientLandingPage() {
   const [isRanked, setIsRanked] = useState(false)
+  const [isFilterMenuOpen, setIsFilterMenuOpen] = useState(false)
+  const [activeWorkOrderCategory, setActiveWorkOrderCategory] = useState<WorkOrderCategoryFilter>('all')
+  const [searchTerm, setSearchTerm] = useState('')
+
   const displayedSuppliers = useMemo(() => {
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase()
+
+    const filteredSuppliers = supplierDatabase.filter((supplier) => {
+      const workOrderCategories = supplierWorkOrderCategories.get(supplier.id)
+      const categoryMatches =
+        activeWorkOrderCategory === 'all' || Boolean(workOrderCategories?.has(activeWorkOrderCategory))
+      const supplierSearchText = [
+        supplier.name,
+        supplier.category,
+        supplier.description,
+        supplier.rating.toString(),
+        supplierWorkOrderSearchText.get(supplier.id) ?? '',
+      ]
+        .join(' ')
+        .toLowerCase()
+      const searchMatches = normalizedSearchTerm === '' || supplierSearchText.includes(normalizedSearchTerm)
+
+      return categoryMatches && searchMatches
+    })
+
     if (!isRanked) {
-      return supplierDatabase
+      return filteredSuppliers
     }
 
-    return [...supplierDatabase].sort((firstSupplier, secondSupplier) => secondSupplier.rating - firstSupplier.rating)
-  }, [isRanked])
+    return [...filteredSuppliers].sort((firstSupplier, secondSupplier) => secondSupplier.rating - firstSupplier.rating)
+  }, [activeWorkOrderCategory, isRanked, searchTerm])
 
   return (
     <main className="client-dashboard-page">
@@ -60,14 +109,52 @@ function ClientLandingPage() {
         <div className="client-supplier-tools" aria-label="Supplier tools">
           <label className="client-search">
             <span className="sr-only">Search suppliers</span>
-            <input type="search" placeholder="Search" />
+            <input
+              type="search"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+            />
             <SearchIcon />
           </label>
 
-          <button className="client-filter-button" type="button">
-            <FilterIcon />
-            <span>Filter</span>
-          </button>
+          <div className="client-filter-menu-wrap">
+            <button
+              className={'client-filter-button ' + (isFilterMenuOpen || activeWorkOrderCategory !== 'all' ? 'is-active' : '')}
+              type="button"
+              aria-expanded={isFilterMenuOpen}
+              aria-controls="client-suppliers-filter-menu"
+              onClick={() => setIsFilterMenuOpen((currentValue) => !currentValue)}
+            >
+              <FilterIcon />
+              <span>Filter</span>
+            </button>
+
+            {isFilterMenuOpen ? (
+              <div className="client-filter-menu" id="client-suppliers-filter-menu">
+                <fieldset className="client-filter-group">
+                  <legend>Work Orders</legend>
+                  <button
+                    className={activeWorkOrderCategory === 'all' ? 'is-active' : ''}
+                    type="button"
+                    onClick={() => setActiveWorkOrderCategory('all')}
+                  >
+                    All
+                  </button>
+                  {workOrderCategoryOptions.map((category) => (
+                    <button
+                      className={activeWorkOrderCategory === category ? 'is-active' : ''}
+                      key={category}
+                      type="button"
+                      onClick={() => setActiveWorkOrderCategory(category)}
+                    >
+                      {category}
+                    </button>
+                  ))}
+                </fieldset>
+              </div>
+            ) : null}
+          </div>
 
           <button
             className={'client-rank-button ' + (isRanked ? 'is-active' : '')}
@@ -91,16 +178,22 @@ function ClientLandingPage() {
               </tr>
             </thead>
             <tbody>
-              {displayedSuppliers.map((supplier, index) => (
-                <tr className={isRanked ? getRankClass(index) : ''} key={supplier.id}>
-                  <td>
-                    <Link to={'/client/supplier-details/' + supplier.id}>{supplier.name}</Link>
-                  </td>
-                  <td>{supplier.category}</td>
-                  <td>{supplier.description}</td>
-                  {isRanked ? <td>{supplier.rating.toFixed(2)}</td> : null}
+              {displayedSuppliers.length > 0 ? (
+                displayedSuppliers.map((supplier, index) => (
+                  <tr className={isRanked ? getRankClass(index) : ''} key={supplier.id}>
+                    <td>
+                      <Link to={'/client/supplier-details/' + supplier.id}>{supplier.name}</Link>
+                    </td>
+                    <td>{supplier.category}</td>
+                    <td>{supplier.description}</td>
+                    {isRanked ? <td>{supplier.rating.toFixed(2)}</td> : null}
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={isRanked ? 4 : 3}>No suppliers match the current search or work order filter.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
