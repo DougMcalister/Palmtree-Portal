@@ -3,13 +3,12 @@ import { Link } from 'react-router'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
 import {
   purchaseOrderDatabase,
-  supplierDatabase,
+  sampleSupplier,
   workOrderDatabase,
   type PurchaseOrder,
   type WorkOrder,
 } from '../local-database.ts'
 
-const demoSupplierId = 'SUP1026393'
 const emissionsDisplayMultiplier = 1250
 
 type SupplierOrderRow = {
@@ -148,7 +147,7 @@ function EmissionsBarChart({ categoryTotals }: { categoryTotals: EmissionCategor
 }
 
 function SupplierAnalyticsPage() {
-  const supplier = supplierDatabase.find((record) => record.id === demoSupplierId) ?? supplierDatabase[0]
+  const supplier = sampleSupplier
 
   const supplierWorkOrders = useMemo(
     () => workOrderDatabase.filter((order) => order.supplier_id === supplier.id),
@@ -163,7 +162,7 @@ function SupplierAnalyticsPage() {
     [supplierWorkOrders, supplierPurchaseOrders],
   )
   const currentOrderRows = useMemo(
-    () => createOrderRows(supplierWorkOrders, supplierPurchaseOrders),
+    () => createOrderRows(supplierWorkOrders, supplierPurchaseOrders).slice(0, 15),
     [supplierWorkOrders, supplierPurchaseOrders],
   )
   const categoryTotals = useMemo(

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
-import { emissionsDatabase, inventoryDatabase, workOrdersDatabase } from '../local-database.ts'
+import { emissionsDatabase, inventoryDatabase, sampleSupplierId, workOrdersDatabase } from '../local-database.ts'
 
 type HomeTableMode = 'orders' | 'inventory'
 
@@ -207,7 +207,10 @@ function SupplierDashboard() {
                 </tr>
               </thead>
               <tbody>
-                {workOrdersDatabase.slice(0,15).map((order) => (
+                {workOrdersDatabase
+                  .filter((order) => order.supplier_id === sampleSupplierId)
+                  .slice(0, 15)
+                  .map((order) => (
                   <tr key={order.jobNo}>
                     <td>{order.jobNo}</td>
                     <td>{order.client}</td>

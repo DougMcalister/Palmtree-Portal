@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import supplierLogo from '../assets/Supplier_logo.png'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
-import { workOrderDatabase, type WorkOrder } from '../local-database.ts'
+import { sampleSupplier, sampleSupplierId, workOrderDatabase, type WorkOrder } from '../local-database.ts'
 import { plumbingInventoryDatabase } from './plumbing-inventory-database.ts'
 
 type InvoiceCategory = 'Transport' | 'Equipment' | 'Waste' | 'Utilities'
@@ -27,7 +27,7 @@ type LineFormState = {
 }
 
 const invoiceCategories: InvoiceCategory[] = ['Transport', 'Equipment', 'Waste', 'Utilities']
-const supplierName = "Mallee Civic Support"
+const supplierName = sampleSupplier?.name ?? 'Supplier'
 
 const invoiceInventoryMap: Record<InvoiceCategory, InventoryKind[]> = {
   Transport: ['vehicles'],
@@ -73,7 +73,9 @@ function OrdersDropdown({
   selectedOrder: string
   onChange: (orderNumber: string) => void
 }) {
-  const firstFifteenOrders = workOrderDatabase.slice(0, 15)
+  const firstFifteenOrders = workOrderDatabase
+    .filter((order) => order.supplier_id === sampleSupplierId)
+    .slice(0, 15)
 
   return (
     <div>
@@ -97,7 +99,7 @@ function OrdersDropdown({
         <p>
           Selected Order:{' '}
           {workOrderDatabase.find(
-            (order) => order.jobNo === selectedOrder
+            (order) => order.supplier_id === sampleSupplierId && order.jobNo === selectedOrder
           )?.jobNo}
         </p>
       )}
@@ -429,7 +431,9 @@ function SupplierInvoicing () {
   const [formState, setFormState] = useState<LineFormState>(emptyLineForm)
   const [selectedOrder, setSelectedOrder] = useState('')
   const [isInvoicePreviewOpen, setIsInvoicePreviewOpen] = useState(false)
-  const selectedWorkOrder = workOrderDatabase.find((order) => order.jobNo === selectedOrder)
+  const selectedWorkOrder = workOrderDatabase.find(
+    (order) => order.supplier_id === sampleSupplierId && order.jobNo === selectedOrder,
+  )
 
   function openLineModal(category: InvoiceCategory) {
     setActiveCategory(category)

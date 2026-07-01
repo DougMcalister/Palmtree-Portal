@@ -2390,21 +2390,22 @@ a {
 /* Demo mode panel */
 
 .demo-panel {
-  position: sticky;
-  top: 0;
+  position: relative;
   z-index: 1000;
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 10px 16px;
-  background: rgba(248, 250, 248, 0.94);
-  backdrop-filter: blur(8px);
+  margin-bottom: -8px;
+  padding: 10px 16px 0;
+  pointer-events: none;
+  background: transparent;
 }
 
 .demo-panel-toggle {
   display: inline-flex;
   overflow: hidden;
-  background: #fff;
+  pointer-events: auto;
+  background: #ffffff;
   border: 1.5px solid rgba(0, 0, 0, 0.28);
   border-radius: 999px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
@@ -2438,6 +2439,10 @@ a {
 
 .demo-panel-button.is-active {
   color: #ffffff;
+  background: var(--teal-action);
+}
+
+.demo-panel-button.is-active:hover {
   background: var(--teal-action);
 }
 

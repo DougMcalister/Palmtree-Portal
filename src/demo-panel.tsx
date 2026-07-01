@@ -24,6 +24,11 @@ function DemoPanel() {
   function handleModeSelect(mode: DemoMode) {
     if (mode === 'off') {
       clearDemoSession()
+
+      if (location.pathname !== '/') {
+        navigate('/')
+      }
+
       return
     }
 

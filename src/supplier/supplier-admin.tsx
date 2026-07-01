@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { AppFooter, SupplierHeader } from './supplier-header.tsx'
-import { workOrdersDatabase } from '../local-database.ts'
+import { sampleSupplierId, workOrdersDatabase } from '../local-database.ts'
 
 function ArrowRightIcon() {
   return (
@@ -50,7 +50,9 @@ function ProfileIcon() {
 
 function SupplierAdminPage() {
   const navigate = useNavigate()
-  const visibleOrders = workOrdersDatabase.slice(0, 11)
+  const visibleOrders = workOrdersDatabase
+    .filter((order) => order.supplier_id === sampleSupplierId)
+    .slice(0, 15)
   const [selectedOrder, setSelectedOrder] = useState('')
 
   return (

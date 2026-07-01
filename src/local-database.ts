@@ -68,6 +68,8 @@ type SupplierCategory = SupplierRecord['category']
 type WorkOrderCategory = WorkOrder['category']
 type PurchaseOrderCategory = PurchaseOrder['category']
 
+export const sampleSupplierId = 'SUP1026393'
+
 type SupplierProfile = {
   category: SupplierCategory
   count: number
@@ -351,9 +353,10 @@ function createWorkOrders(suppliers: SupplierRecord[]) {
   const workOrderSuppliers = suppliers.filter((supplier) =>
     ['Trade Services', 'Civil and Construction', 'Consulting', 'Waste', 'F&B Service', 'Other'].includes(supplier.category),
   )
+  const sampleSupplier = workOrderSuppliers.find((supplier) => supplier.id === sampleSupplierId)
 
   return Array.from({ length: 400 }, (_, index) => {
-    const supplier = workOrderSuppliers[index % workOrderSuppliers.length]
+    const supplier = index < 15 && sampleSupplier ? sampleSupplier : workOrderSuppliers[index % workOrderSuppliers.length]
     const category = workOrderCategoryMap[supplier.category]
     const emissions = roundToTwo(0.72 + ((index * 19) % 330) / 100 + (category === 'Civil/Construction' ? 0.85 : 0))
 
@@ -429,6 +432,7 @@ function validateEmissionsForOrdersBeforeCutoff(
 }
 
 export const supplierDatabase: SupplierRecord[] = createSuppliers()
+export const sampleSupplier = supplierDatabase.find((supplier) => supplier.id === sampleSupplierId) ?? supplierDatabase[0]
 export const workOrderDatabase: WorkOrder[] = createWorkOrders(supplierDatabase)
 export const workOrdersDatabase = workOrderDatabase
 export const purchaseOrderDatabase: PurchaseOrder[] = createPurchaseOrders(supplierDatabase)
